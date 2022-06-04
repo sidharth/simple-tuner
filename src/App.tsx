@@ -1,26 +1,47 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
 function App() {
+
+  useEffect(() => {
+    startListening()
+  }, [])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      Hello world!
     </div>
   );
+}
+
+function startListening() {
+  navigator.mediaDevices.getUserMedia({audio: true, video: false})
+    .then(mediaStream => {
+      // Setup audio source
+      let audioContext = new AudioContext()
+      let audioSource = audioContext.createMediaStreamSource(mediaStream)
+
+      // Set up analyzer.
+      let analyzerNode = audioContext.createAnalyser()
+      analyzerNode.fftSize = 2048
+
+      // Feed in audio data to analyzer.
+      audioSource.connect(analyzerNode)
+
+      processAudioBuffer(analyzerNode)
+    })
+}
+
+function processAudioBuffer(analyzer: AnalyserNode) {
+  let bufferLength = analyzer.frequencyBinCount
+  let audioArray = new Uint8Array(bufferLength)
+
+  analyzer.getByteTimeDomainData(audioArray)
+  for (let i=0; i<bufferLength; i++) {
+    let sample = audioArray[i]
+  }
+  // processAudioBuffer(analyzer)
 }
 
 export default App;
